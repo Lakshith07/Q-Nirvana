@@ -1,0 +1,14 @@
+PORT=5000
+NODE_ENV=development
+
+# Firebase is configured via src/config/firebase-service-account.json
+JWT_SECRET=qnirvana_super_secret_jwt_key_2026_hackathon
+JWT_EXPIRES_IN=7d
+
+FRONTEND_URL=http://localhost:5173
+
+# Email Configuration
+EMAIL_ENABLED=true
+EMAIL_USER=bezawadalakshith5@gmail.com
+EMAIL_PASS=yhefhfeqjcnwfrjx
+# TELEGRAM_BOT_TOKEN=
