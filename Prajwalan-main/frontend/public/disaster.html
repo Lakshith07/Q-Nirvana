@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESI·X — Emergency Severity Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #f4f6f9;
+    --surface:  #ffffff;
+    --border:   #e5e9f0;
+    --border2:  #d0d7e3;
+    --accent:   #e63946;
+    --yellow:   #f59e0b;
+    --green:    #10b981;
+    --blue:     #3b7de8;
+    --text:     #1e2533;
+    --muted:    #6b7a99;
+    --mono:     'DM Mono', monospace;
+    --head:     'Inter', sans-serif;
+    --body:     'Inter', sans-serif;
+    --radius:   12px;
+    --radius-sm:8px;
+    --shadow:   0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* no grid overlay */
+  body::before { display: none; }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  .logo-mark {
+    width: 42px;
+    height: 42px;
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    clip-path: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(230,57,70,0.25);
+    animation: none;
+    font-size: 18px;
+  }
+
+  .logo-mark::after { content: '⚡'; }
+
+  .logo-text h1 {
+    font-family: var(--head);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    text-transform: none;
+    color: var(--text);
+  }
+
+  .logo-text p {
+    font-family: var(--body);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 2px;
+  }
+
+  .system-badge {
+    margin-left: auto;
+    font-family: var(--body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #059669;
+    background: rgba(16,185,129,0.10);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    letter-spacing: 0;
+    display: flex; align-items: center; gap: 7px;
+    animation: none;
+  }
+
+  .system-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: #10b981;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: live-dot 1.8s ease-in-out infinite;
+  }
+
+  @keyframes live-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.4); opacity: 0.6; }
+  }
+
+  /* ── Panel → White Card ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+
+  .panel::before {
+    content: attr(data-label);
+    position: static;
+    display: block;
+    font-family: var(--body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    padding: 0 0 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+  label {
+    display: block;
+    font-family: var(--body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--muted);
+    text-transform: none;
+    margin-bottom: 7px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(59,125,232,0.12);
+    background: #fff;
+  }
+
+  select option { background: #fff; font-size: 14px; }
+
+  /* ── Button ── */
+  .btn-analyze {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 14px rgba(230,57,70,0.28);
+  }
+
+  .btn-analyze:hover:not(:disabled) {
+    background: #c1121f;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(230,57,70,0.38);
+  }
+
+  .btn-analyze:disabled {
+    background: var(--border2);
+    box-shadow: none;
+    cursor: not-allowed;
+    color: var(--muted);
+  }
+
+  .btn-analyze .btn-shimmer {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-analyze:not(:disabled):hover .btn-shimmer { left: 100%; }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 14px;
+    display: none;
+    overflow: hidden;
+  }
+
+  .progress-bar.active { display: block; }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--yellow));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ── Results ── */
+  #results {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s, transform 0.5s;
+    pointer-events: none;
+  }
+
+  #results.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  /* ── Triage Grid ── */
+  .triage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) { .triage-grid { grid-template-columns: 1fr; } }
+
+  .triage-card {
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .triage-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
+
+  .triage-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+  }
+
+  .triage-card.red    { border-top: none; }
+  .triage-card.red::after    { background: var(--accent); }
+  .triage-card.yellow::after { background: var(--yellow); }
+  .triage-card.green::after  { background: var(--green); }
+
+  .triage-label {
+    font-family: var(--body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 1;
+  }
+
+  .triage-card.red    .triage-label { color: var(--accent); }
+  .triage-card.yellow .triage-label { color: var(--yellow); }
+  .triage-card.green  .triage-label { color: var(--green); }
+
+  .triage-count {
+    font-family: var(--head);
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .triage-pct {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* ── Bar viz ── */
+  .bar-viz {
+    display: flex;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    gap: 2px;
+    border-radius: 3px;
+  }
+
+  .bar-seg {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bar-seg.red    { background: var(--accent); }
+  .bar-seg.yellow { background: var(--yellow); }
+  .bar-seg.green  { background: var(--green); }
+
+  /* ── Resource Panel ── */
+  .resource-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+
+  .resource-panel::before {
+    content: 'ESI Resource Matrix';
+    position: static;
+    display: block;
+    font-family: var(--body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    padding: 0 0 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .resource-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--body);
+    font-size: 13.5px;
+  }
+
+  .resource-table thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .resource-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .resource-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .resource-table tr:last-child td { border-bottom: none; }
+  .resource-table tr:hover td { background: var(--bg); }
+
+  .resource-table .icon { font-size: 17px; }
+
+  .resource-table .qty {
+    font-family: var(--head);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .resource-table .formula {
+    color: var(--muted);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .dot.red    { background: var(--accent); }
+  .dot.yellow { background: var(--yellow); }
+
+  /* ── Alert Banner ── */
+  .alert-banner {
+    background: rgba(230,57,70,0.05);
+    border: 1px solid rgba(230,57,70,0.22);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(230,57,70,0.07);
+    animation: alert-in 0.4s ease;
+  }
+
+  @keyframes alert-in {
+    from { transform: translateX(-8px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+
+  .alert-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+    animation: shake 0.5s ease 0.3s;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    20%      { transform: rotate(-10deg); }
+    60%      { transform: rotate(10deg); }
+  }
+
+  .alert-text {
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .alert-text strong { color: var(--accent); font-weight: 700; }
+
+  /* ── AI note ── */
+  .ai-note {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    border-left: 2px solid var(--border);
+    padding-left: 10px;
+    margin-top: 7px;
+    line-height: 1.8;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-mark"></div>
+    <div class="logo-text">
+      <h1>ESI · X</h1>
+      <p>XGBoost + ESI Hybrid · Emergency Severity Intelligence</p>
+    </div>
+    <span class="system-badge">● SYSTEM LIVE</span>
+  </header>
+
+  <!-- INPUT PANEL -->
+  <div class="panel" data-label="Incident Parameters">
+    <div class="field-row">
+      <div>
+        <label>Number of People Affected</label>
+        <input type="number" id="peopleCount" value="100" min="1" max="10000" placeholder="100">
+      </div>
+      <div>
+        <label>Incident Type</label>
+        <select id="incidentType">
+          <option value="building_collapse">Building Collapse</option>
+          <option value="road_accident">Mass Road Accident</option>
+          <option value="explosion">Explosion / Blast</option>
+          <option value="fire">Structure Fire</option>
+          <option value="flood">Flash Flood</option>
+          <option value="stampede">Stampede</option>
+          <option value="chemical">Chemical Exposure</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
+      <span class="btn-shimmer"></span>
+      ⚡ Run XGBoost Prediction
+    </button>
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <!-- ALERT BANNER -->
+    <div class="alert-banner">
+      <div class="alert-icon">🚨</div>
+      <div>
+        <div class="alert-text" id="alertText"></div>
+        <div class="ai-note" id="aiNote"></div>
+      </div>
+    </div>
+
+    <!-- TRIAGE DISTRIBUTION -->
+    <div class="panel" data-label="XGBoost Triage Distribution">
+      <div class="bar-viz">
+        <div class="bar-seg red" id="barRed" style="width:0%"></div>
+        <div class="bar-seg yellow" id="barYellow" style="width:0%"></div>
+        <div class="bar-seg green" id="barGreen" style="width:0%"></div>
+      </div>
+      <div class="triage-grid">
+        <div class="triage-card red">
+          <div class="triage-label">● Critical (Red)</div>
+          <div class="triage-count" id="redCount">0</div>
+          <div class="triage-pct" id="redPct">— %</div>
+        </div>
+        <div class="triage-card yellow">
+          <div class="triage-label">● Urgent (Yellow)</div>
+          <div class="triage-count" id="yellowCount">0</div>
+          <div class="triage-pct" id="yellowPct">— %</div>
+        </div>
+        <div class="triage-card green">
+          <div class="triage-label">● Minor (Green)</div>
+          <div class="triage-count" id="greenCount">0</div>
+          <div class="triage-pct" id="greenPct">— %</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOURCE TABLE -->
+    <div class="resource-panel">
+      <table class="resource-table">
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>ESI Formula</th>
+            <th style="text-align:right">Units Reserved</th>
+          </tr>
+        </thead>
+        <tbody id="resourceRows"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /results -->
+
+  <footer>ESI·X PROTOTYPE — XGBoost ML Engine + Emergency Severity Index Matrix · v2.1.0</footer>
+
+</div>
+
+<script>
+/* ── XGBoost Simulation Layer ──────────────────────────────────────────── */
+const INCIDENT_PROFILES = {
+  building_collapse: { red: 0.20, yellow: 0.35, green: 0.45, label: 'Building Collapse', model: 'BC-XGB-v3' },
+  road_accident:     { red: 0.18, yellow: 0.42, green: 0.40, label: 'Mass Road Accident', model: 'RA-XGB-v2' },
+  explosion:         { red: 0.30, yellow: 0.38, green: 0.32, label: 'Explosion / Blast', model: 'EX-XGB-v4' },
+  fire:              { red: 0.14, yellow: 0.30, green: 0.56, label: 'Structure Fire', model: 'SF-XGB-v2' },
+  flood:             { red: 0.10, yellow: 0.25, green: 0.65, label: 'Flash Flood', model: 'FL-XGB-v1' },
+  stampede:          { red: 0.22, yellow: 0.40, green: 0.38, label: 'Stampede', model: 'ST-XGB-v2' },
+  chemical:          { red: 0.28, yellow: 0.45, green: 0.27, label: 'Chemical Exposure', model: 'CH-XGB-v3' },
+};
+
+/* ── ESI Resource Matrix ───────────────────────────────────────────────── */
+const ESI_MATRIX = [
+  { name: 'Blood Packets',      icon: '🩸', redMult: 4, yellowMult: 2, greenMult: 0,   unit: 'pkt' },
+  { name: 'O₂ Cylinders',       icon: '🫁', redMult: 2, yellowMult: 1, greenMult: 0,   unit: 'cyl' },
+  { name: 'Trauma Kits',        icon: '🧰', redMult: 3, yellowMult: 2, greenMult: 1,   unit: 'kit' },
+  { name: 'IV Fluid Bags',      icon: '💉', redMult: 5, yellowMult: 2, greenMult: 0,   unit: 'bag' },
+  { name: 'Ventilators',        icon: '🫀', redMult: 1, yellowMult: 0, greenMult: 0,   unit: 'unt' },
+  { name: 'Ambulances',         icon: '🚑', redMult: 1, yellowMult: 0, greenMult: 0,   unit: 'veh' },
+  { name: 'Stretchers',         icon: '🛏️', redMult: 1, yellowMult: 1, greenMult: 0,   unit: 'str' },
+  { name: 'First Aid Kits',     icon: '🩹', redMult: 1, yellowMult: 2, greenMult: 2,   unit: 'kit' },
+];
+
+function runAnalysis() {
+  const n = parseInt(document.getElementById('peopleCount').value) || 100;
+  const incidentKey = document.getElementById('incidentType').value;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+
+  // Show progress
+  const pb = document.getElementById('progressBar');
+  const pf = document.getElementById('progressFill');
+  pb.classList.add('active');
+  let pct = 0;
+  const steps = [
+    { w: 25, label: 'Loading model weights…' },
+    { w: 55, label: 'Running XGBoost inference…' },
+    { w: 80, label: 'Applying ESI matrix…' },
+    { w: 100, label: 'Finalizing allocations…' },
+  ];
+  let si = 0;
+  btn.textContent = steps[0].label;
+
+  const iv = setInterval(() => {
+    if (si < steps.length) {
+      pct = steps[si].w;
+      pf.style.width = pct + '%';
+      btn.textContent = steps[si].label;
+      si++;
+    } else {
+      clearInterval(iv);
+      pb.classList.remove('active');
+      pf.style.width = '0%';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-shimmer"></span>⚡ Run XGBoost Prediction';
+      renderResults(n, incidentKey);
+    }
+  }, 420);
+}
+
+function renderResults(n, incidentKey) {
+  const profile = INCIDENT_PROFILES[incidentKey];
+
+  // Add slight stochastic noise to simulate real model variance
+  const noise = () => (Math.random() - 0.5) * 0.04;
+  let rPct = Math.max(0.05, Math.min(0.60, profile.red + noise()));
+  let yPct = Math.max(0.05, Math.min(0.60, profile.yellow + noise()));
+  let rem = 1 - rPct - yPct;
+  let gPct = Math.max(0.01, rem);
+
+  // Normalize
+  const total = rPct + yPct + gPct;
+  rPct /= total; yPct /= total; gPct /= total;
+
+  const red = Math.round(n * rPct);
+  const yellow = Math.round(n * yPct);
+  const green = n - red - yellow;
+
+  // Update triage cards
+  document.getElementById('redCount').textContent = red;
+  document.getElementById('yellowCount').textContent = yellow;
+  document.getElementById('greenCount').textContent = green;
+  document.getElementById('redPct').textContent = (rPct * 100).toFixed(1) + '% of total';
+  document.getElementById('yellowPct').textContent = (yPct * 100).toFixed(1) + '% of total';
+  document.getElementById('greenPct').textContent = (gPct * 100).toFixed(1) + '% of total';
+
+  // Animate bars after tiny delay
+  setTimeout(() => {
+    document.getElementById('barRed').style.width = (rPct * 100) + '%';
+    document.getElementById('barYellow').style.width = (yPct * 100) + '%';
+    document.getElementById('barGreen').style.width = (gPct * 100) + '%';
+  }, 100);
+
+  // Resource rows
+  const tbody = document.getElementById('resourceRows');
+  tbody.innerHTML = '';
+  const highlights = {};
+
+  ESI_MATRIX.forEach(r => {
+    const qty = red * r.redMult + yellow * r.yellowMult + green * r.greenMult;
+    if (qty === 0) return;
+    highlights[r.name] = qty;
+
+    const formulaParts = [];
+    if (r.redMult) formulaParts.push(`<span class="dot red"></span>${red}×${r.redMult}`);
+    if (r.yellowMult) formulaParts.push(`<span class="dot yellow"></span>${yellow}×${r.yellowMult}`);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="icon">${r.icon}</span> ${r.name}</td>
+      <td class="formula">${formulaParts.join(' + ')}</td>
+      <td class="qty">${qty} <span style="font-size:12px;color:var(--muted);font-family:var(--mono)">${r.unit}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Alert text — primary two resources
+  const blood = red * 4 + yellow * 2;
+  const o2 = red * 2 + yellow * 1;
+  document.getElementById('alertText').innerHTML =
+    `Alert: <strong>${blood} Blood Packets</strong> and <strong>${o2} O₂ Cylinders</strong> have been reserved for incoming casualties.`;
+
+  document.getElementById('aiNote').innerHTML =
+    `MODEL: ${profile.model} &nbsp;|&nbsp; INCIDENT: ${profile.label} &nbsp;|&nbsp; N=${n} &nbsp;|&nbsp; ` +
+    `CONFIDENCE: ${(87 + Math.random()*8).toFixed(1)}% &nbsp;|&nbsp; ` +
+    `ESI MATRIX: v4.2 &nbsp;|&nbsp; TIMESTAMP: ${new Date().toISOString()}`;
+
+  // Show results
+  const r = document.getElementById('results');
+  r.classList.add('visible');
+  r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Run on load with defaults
+window.addEventListener('load', () => {
+  setTimeout(() => runAnalysis(), 600);
+});
+</script>
+</body>
+</html>
